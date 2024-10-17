@@ -33,7 +33,7 @@ export default function Game() {
   useEffect(() => {
     if (socket) {
       // Listen for startGame event
-      socket.on("startGame", (message: string) => {
+      socket.on("startGame", () => {
         setGameStarted(true);
       });
 
