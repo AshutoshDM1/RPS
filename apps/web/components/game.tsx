@@ -13,12 +13,15 @@ import { Scissors, Hand, Square, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import ColorfulSpinningLoader from "./ui/laoder";
 import { toast } from "sonner";
+import { ComboboxDemo } from "./lockRoom";
+import { useRecoilValue } from "recoil";
+import { valueAtom } from "@/state/atoms";
 
 type Choice = "rock" | "paper" | "scissors" | null;
 
 export default function Game() {
-  const socket = useSocket("http://localhost:4000");
-  const [roomId, setRoomId] = useState("room1");
+  const socket = useSocket("https://rps-timw.onrender.com");
+  const roomId = useRecoilValue(valueAtom);
   const [joinRoom, setJoinRoom] = useState(true);
   const [playerChoice, setPlayerChoice] = useState<Choice>(null);
   const [opponentChoice, setopponentChoice] = useState<Choice>(null);
@@ -26,29 +29,25 @@ export default function Game() {
   const [score, setScore] = useState({ You: 0, Opponent: 0 });
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
-  console.log(setRoomId);
+
   useEffect(() => {
     if (socket) {
       // Listen for startGame event
       socket.on("startGame", (message: string) => {
-        console.log(message);
         setGameStarted(true);
       });
 
       // Listen for gameResult event
       socket.on(
         "gameResult",
-        ({ player1, choice1, player2, choice2, result, winner }) => {
+        ({ player1, choice1, choice2, result, winner }) => {
           toast.dismiss();
-          console.log(player2);
           if (result != "It's a tie!") {
             if (socket.id === winner) {
               setResult("You Win");
-              console.log(score);
               setScore((prev) => ({ ...prev, You: prev.You + 1 }));
             } else {
               setResult("You Lose");
-              console.log(score);
 
               setScore((prev) => ({ ...prev, Opponent: prev.Opponent + 1 }));
             }
@@ -59,11 +58,14 @@ export default function Game() {
           setShowResult(result);
         }
       );
-
+      socket.on("roomFull", (msg) => {
+        toast.error(msg);
+      });
       // Clean up socket listeners when the component unmounts
       return () => {
         socket.off("startGame");
         socket.off("gameResult");
+        socket.off("roomFull");
       };
     }
   }, [socket]);
@@ -72,7 +74,6 @@ export default function Game() {
   const handleJoinRoom = () => {
     if (socket) {
       socket.emit("joinRoom", roomId);
-      console.log("Joined room:", roomId);
       setJoinRoom(false);
     } else {
       console.error("Socket is not initialized");
@@ -132,12 +133,15 @@ export default function Game() {
         <h1 className="text-center text-[#ffffff] font-bold italic text-[2rem] ">
           PRS+{" "}
         </h1>
-        <Button
-          onClick={handleJoinRoom}
-          className=" bg-slate-50 hover:bg-slate-200 text-black "
-        >
-          Join Room
-        </Button>
+        <div className="flex gap-2 ">
+          <ComboboxDemo />
+          <Button
+            onClick={handleJoinRoom}
+            className=" bg-[#D22884] hover:bg-[#fd53ae] text-white font-[600] "
+          >
+            Join Room
+          </Button>
+        </div>
       </div>
       <div className="h-[92vh] w-full flex flex-col items-center justify-center ">
         <Card className="min-h-[60vh] w-full max-w-md mx-auto bg-white/90 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden transition-all duration-300 ease-in-out transform flex flex-col justify-between ">

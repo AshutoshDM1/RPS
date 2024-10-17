@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -17,7 +18,8 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "RPS+",
   description: "A Rock , Paper, Scissors Game",
-  icons: "https://static.vecteezy.com/system/resources/previews/047/825/978/non_2x/3d-cube-icon-against-transparent-background-free-png.png"
+  icons:
+    "https://static.vecteezy.com/system/resources/previews/047/825/978/non_2x/3d-cube-icon-against-transparent-background-free-png.png",
 };
 
 export default function RootLayout({
@@ -29,8 +31,9 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      > <Toaster />
-        {children}
+      >
+        {" "}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
